@@ -12,10 +12,38 @@ sfr_interp_tab = None
 @timeme
 
 ###################################################################################################################
-def Mhalo_to_Ly_alpha_luminosity(halos, model, coeffs):
+# def Mhalo_to_Ly_alpha_luminosity(halos, model, coeffs):
 
+#     """
+#     General function to get L_ly_alpha(M_halo) given a certain model <model>
+#     if adding your own model follow this structure,
+#     and simply specify the model to use in the parameter file
+#     will output halo luminosities in **L_sun**
+
+#     Parameters
+#     ----------
+#     halos : class
+#         Contains all halo information (position, redshift, etc..)
+#     model : str
+#         Model to use, specified in the parameter file
+#     """    
+
+#     dict = {'Santos': Mhalo_to_L_lyman_alpha_Santos,
+#             }
+
+
+#     if model in dict.keys():
+#         return dict[model](halos, coeffs)
+
+#     else:
+#         sys.exit('\n\n\tYour lyman_alpha model, '+model+', does not seem to exist\n\t\tPlease check src/halos_to_luminosity.py to add it\n\n')
+
+
+
+
+def Mhalo_to_L(halos, model, coeffs):
     """
-    General function to get L_ly_alpha(M_halo) given a certain model <model>
+    General function to get L_co(M_halo) given a certain model <model>
     if adding your own model follow this structure,
     and simply specify the model to use in the parameter file
     will output halo luminosities in **L_sun**
@@ -26,19 +54,30 @@ def Mhalo_to_Ly_alpha_luminosity(halos, model, coeffs):
         Contains all halo information (position, redshift, etc..)
     model : str
         Model to use, specified in the parameter file
-    """    
+    coeffs :
+        None for default coeffs
+    """
+    dict = {'Li':          Mhalo_to_Lco_Li,
+            'Li_sc':       Mhalo_to_Lco_Li_sigmasc,
+            'Padmanabhan': Mhalo_to_Lco_Padmanabhan,
+            'fiuducial':   Mhalo_to_Lco_fiuducial,
+            'Yang':        Mhalo_to_Lco_Yang,
+            'arbitrary':   Mhalo_to_Lco_arbitrary,
 
-    dict = {'Santos': Mhalo_to_L_ly_alpha_Santos,
+            'Santos':      Mhalo_to_L_lyman_alpha_Santos,
             }
 
+    # This print is added by Doga
+    print("You are using ", model, " model")
 
     if model in dict.keys():
         return dict[model](halos, coeffs)
 
     else:
-        sys.exit('\n\n\tYour lyman_alpha model, '+model+', does not seem to exist\n\t\tPlease check src/halos_to_luminosity.py to add it\n\n')
+        sys.exit('\n\n\tYour model, '+model+', does not seem to exist\n\t\tPlease check src/halos_to_luminosity.py to add it\n\n')
 
-def Mhalo_to_L_ly_alpha_Santos(halos, coeffs):
+
+def Mhalo_to_L_lyman_alpha_Santos(halos, coeffs):
 
     """
     halo mass to SFR to L_lyman_alpha
@@ -76,37 +115,40 @@ def Mhalo_to_L_ly_alpha_Santos(halos, coeffs):
 
     return L_lyman_alpha       
 
+
+
+
 ###################################################################################################################
 
-def Mhalo_to_Lco(halos, model, coeffs):
-    """
-    General function to get L_co(M_halo) given a certain model <model>
-    if adding your own model follow this structure,
-    and simply specify the model to use in the parameter file
-    will output halo luminosities in **L_sun**
+# def Mhalo_to_Lco(halos, model, coeffs):
+#     """
+#     General function to get L_co(M_halo) given a certain model <model>
+#     if adding your own model follow this structure,
+#     and simply specify the model to use in the parameter file
+#     will output halo luminosities in **L_sun**
 
-    Parameters
-    ----------
-    halos : class
-        Contains all halo information (position, redshift, etc..)
-    model : str
-        Model to use, specified in the parameter file
-    coeffs :
-        None for default coeffs
-    """
-    dict = {'Li':          Mhalo_to_Lco_Li,
-            'Li_sc':       Mhalo_to_Lco_Li_sigmasc,
-            'Padmanabhan': Mhalo_to_Lco_Padmanabhan,
-            'fiuducial':   Mhalo_to_Lco_fiuducial,
-            'Yang':        Mhalo_to_Lco_Yang,
-            'arbitrary':   Mhalo_to_Lco_arbitrary,
-            }
+#     Parameters
+#     ----------
+#     halos : class
+#         Contains all halo information (position, redshift, etc..)
+#     model : str
+#         Model to use, specified in the parameter file
+#     coeffs :
+#         None for default coeffs
+#     """
+#     dict = {'Li':          Mhalo_to_Lco_Li,
+#             'Li_sc':       Mhalo_to_Lco_Li_sigmasc,
+#             'Padmanabhan': Mhalo_to_Lco_Padmanabhan,
+#             'fiuducial':   Mhalo_to_Lco_fiuducial,
+#             'Yang':        Mhalo_to_Lco_Yang,
+#             'arbitrary':   Mhalo_to_Lco_arbitrary,
+#             }
 
-    if model in dict.keys():
-        return dict[model](halos, coeffs)
+#     if model in dict.keys():
+#         return dict[model](halos, coeffs)
 
-    else:
-        sys.exit('\n\n\tYour model, '+model+', does not seem to exist\n\t\tPlease check src/halos_to_luminosity.py to add it\n\n')
+#     else:
+#         sys.exit('\n\n\tYour model, '+model+', does not seem to exist\n\t\tPlease check src/halos_to_luminosity.py to add it\n\n')
 
 
 def Mhalo_to_Lco_Li(halos, coeffs):

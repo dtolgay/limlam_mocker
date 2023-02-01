@@ -70,6 +70,7 @@ def cull_peakpatch_catalogue(halos, min_mass, mapinst):
                                * (np.abs(halos.dec) <= mapinst.fov_y/2)
                                * (halos.redshift <= mapinst.z_f)]
 
+    # This is an edition to this code with the help of Delaney
     dm = dm[0]
     
     for i in dir(halos):

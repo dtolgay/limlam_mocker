@@ -29,7 +29,7 @@ def map_to_pspec(map,cosmo):
     x,y,z = map.pix_binedges_x, map.pix_binedges_y, map.nu_binedges
     t     = map.maps
 
-    zco   = redshift_to_chi(map.nu_rest/z-1,cosmo)
+    zco   = redshift_to_chi(map.nu_rest/z-1,cosmo)      # Transform from comoving distance to redshift 
     # assume comoving transverse distance = comoving distance
     # (i.e. no curvature)
 
@@ -39,6 +39,9 @@ def map_to_pspec(map,cosmo):
 
     dxco, dyco, dzco = [np.abs(np.mean(np.diff(d))) for d in (xco, yco, zco)]
     Pk_3D            = np.abs(np.fft.rfftn(t)*dxco*dyco*dzco)**2/np.abs(np.ptp(xco)*np.ptp(yco)*np.ptp(zco))
+
+    # print("dxco, dyco, dzco: ", dxco, dyco, dzco)
+    # print("t: ", t)
 
     kx        = 2*np.pi*np.fft.fftfreq(xco.size-1,d=dxco)
     ky        = 2*np.pi*np.fft.fftfreq(yco.size-1,d=dyco)

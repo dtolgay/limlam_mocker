@@ -3,76 +3,12 @@ import numpy as np
 from  .tools import *
 from . import debug
 
+
+
+################################################################################################################################################################
+
 @timeme
-
-################################################################################################################################################################
-
-def L_lyman_alpha_to_map(halos,map,units='temperature'):
-    """
-    Converts Luminosity to brightness temperature
-    and bins into 3d intensity map data cube
-
-    Parameters
-    ----------
-    halos : class
-        Contains all halo information (position, redshift, etc..)
-    map : class
-       contains all information about the map that the halos will be binned into
-
-    Returns
-    -------
-    maps :
-        The 3D data cube of brightness temperature
-    """
-
-    ### Calculate line freq from redshift
-    halos.nu  = map.nu_rest/(halos.redshift+1)
-
-    # Transform from Luminosity to Temperature (uK)
-    # ... or to flux density (Jy/sr)
-    if (units=='intensity'):        
-        if debug.verbose: print('\n\tcalculating halo intensities')
-        halos.T_lyman_alpha = I_line_lyman_alpha(halos, map)                        # This function won't work because there are not functions created for lyman alpha
-    else:
-        if debug.verbose: print('\n\tcalculating halo temperatures')
-        halos.T_lyman_alpha = T_line_lyman_alpha(halos, map)
-
-    # flip frequency bins because np.histogram needs increasing bins
-    bins3D = [map.pix_binedges_x, map.pix_binedges_y, map.nu_binedges[::-1]]
-
-    #TODO: Delete
-
-    # print("np.c_[halos.ra, halos.dec, halos.nu]: ", np.c_[halos.ra, halos.dec, halos.nu])
-
-    # print(bins3D[0].shape, bins3D[1].shape, bins3D[2].shape)
-    # print(bins3D[0].shape, bins3D[1].shape, bins3D[2].shape)
-    # # data = np.stack([halos.ra, halos.dec, halos.nu]).reshape((int(len(bins3D[0])), int(len(bins3D[1])), int(len(bins3D[2]))))
-    # data = np.array([halos.ra, halos.dec, halos.nu])
-
-    # print(len(data[0]), len(data[1]), len(data[2]))
-    # print(data.shape)
-
-    # print(bins3D[0].shape, bins3D[1].shape, bins3D[2].shape)
-    # print("halos.ra.shape: ", halos.ra.shape)
-    # print("halos.dec.shape: ", halos.dec.shape)
-    # print("halos.nu.shape: ", halos.nu.shape)
-    # print(np.c_[halos.ra.flatten(), halos.dec.flatten(), halos.nu.flatten()].shape)
-
-
-
-    # bin in RA, DEC, NU_obs
-    if debug.verbose: print('\n\tBinning halos into map')
-    maps, edges = np.histogramdd( np.c_[halos.ra.flatten(), halos.dec.flatten(), halos.nu.flatten()],
-                                  bins    = bins3D,
-                                  weights = halos.L_lyman_alpha.flatten() )
-    if (units=='intensity'):
-        maps/= map.Ompix
-    # flip back frequency bins
-    return maps[:,:,::-1]
-
-################################################################################################################################################################
-
-def Lco_to_map(halos,map,units='temperature'):
+def L_to_map(halos,map,units='temperature'):
     """
     Converts Luminosity to brightness temperature
     and bins into 3d intensity map data cube
@@ -97,37 +33,21 @@ def Lco_to_map(halos,map,units='temperature'):
     # ... or to flux density (Jy/sr)
     if (units=='intensity'):
         if debug.verbose: print('\n\tcalculating halo intensities')
-        halos.Tco = I_line(halos, map)
+        halos.I = I_line(halos, map)
     else:
         if debug.verbose: print('\n\tcalculating halo temperatures')
-        halos.Tco = T_line(halos, map)
+        halos.T = T_line(halos, map)
 
     # flip frequency bins because np.histogram needs increasing bins
     bins3D = [map.pix_binedges_x, map.pix_binedges_y, map.nu_binedges[::-1]]
 
-    #TODO: Delete
-
-    # print("np.c_[halos.ra, halos.dec, halos.nu]: ", np.c_[halos.ra, halos.dec, halos.nu])
-
-    # print(bins3D[0].shape, bins3D[1].shape, bins3D[2].shape)
-    # print(bins3D[0].shape, bins3D[1].shape, bins3D[2].shape)
-    # # data = np.stack([halos.ra, halos.dec, halos.nu]).reshape((int(len(bins3D[0])), int(len(bins3D[1])), int(len(bins3D[2]))))
-    # data = np.array([halos.ra, halos.dec, halos.nu])
-
-    # print(len(data[0]), len(data[1]), len(data[2]))
-    # print(data.shape)
-
-    # print(bins3D[0].shape, bins3D[1].shape, bins3D[2].shape)
-    # print("halos.ra.shape: ", halos.ra.shape)
-    # print("halos.dec.shape: ", halos.dec.shape)
-    # print("halos.nu.shape: ", halos.nu.shape)
-    # print(np.c_[halos.ra.flatten(), halos.dec.flatten(), halos.nu.flatten()].shape)
 
     # bin in RA, DEC, NU_obs
     if debug.verbose: print('\n\tBinning halos into map')
     maps, edges = np.histogramdd( np.c_[halos.ra.flatten(), halos.dec.flatten(), halos.nu.flatten()],
                                   bins    = bins3D,
-                                  weights = halos.Tco.flatten() )
+                                  weights = halos.T.flatten() )
+
     if (units=='intensity'):
         maps/= map.Ompix
     # flip back frequency bins
@@ -142,9 +62,9 @@ def I_line(halos, map):
      then 1 L_sun/Mpc**2/GHz = 4.0204e-2 Jy/sr
     '''
     convfac = 4.0204e-2 # Jy/sr per Lsol/Mpc/Mpc/GHz
-    Ico     = convfac * halos.Lco/4/np.pi/halos.chi**2/(1+halos.redshift)**2/map.dnu
+    I     = convfac * halos.L/4/np.pi/halos.chi**2/(1+halos.redshift)**2/map.dnu
 
-    return Ico
+    return I
 
 def T_line(halos, map):
     """
@@ -159,29 +79,51 @@ def T_line(halos, map):
         = 2.63083e-6 K = 2.63083 muK
     """
     convfac = 2.63083
-    Tco     = 1./2*convfac/halos.nu**2 * halos.Lco/4/np.pi/halos.chi**2/(1+halos.redshift)**2/map.dnu/map.Ompix
+    T     = 1./2*convfac/halos.nu**2 * halos.L/4/np.pi/halos.chi**2/(1+halos.redshift)**2/map.dnu/map.Ompix
 
-    return Tco
+    return T
 
 ################################################################################################################################################################
 
-def T_line_lyman_alpha(halos_lyman_alpha, map):
+@timeme
+def L_to_map_2(halos,map):
     """
-    The line Temperature in Rayleigh-Jeans limit
-    T_line = c^2/2/kb/nuobs^2 * I_line
+    Converts Luminosity to brightness temperature
+    and bins into 3d intensity map data cube
 
-     where the Intensity I_line = L_line/4/pi/D_L^2/dnu
-        D_L = D_p*(1+z), I_line units of L_sun/Mpc^2/Hz
+    Parameters
+    ----------
+    halos : class
+        Contains all halo information (position, redshift, etc..)
+    map : class
+       contains all information about the map that the halos will be binned into
 
-     T_line units of [L_sun/Mpc^2/GHz] * [(km/s)^2 / (J/K) / (GHz) ^2] * 1/sr
-        = [ 3.48e26 W/Mpc^2/GHz ] * [ 6.50966e21 s^2/K/kg ]
-        = 2.63083e-6 K = 2.63083 muK
+    Returns
+    -------
+    maps :
+        The 3D data cube of brightness temperature
     """
 
-    convfac = 2.63083
-    T_lyman_alpha     = 1./2*convfac/halos_lyman_alpha.nu**2 * halos_lyman_alpha.L_lyman_alpha/4/np.pi/halos_lyman_alpha.chi**2/(1+halos_lyman_alpha.redshift)**2/map.dnu/map.Ompix
+    ### Calculate line freq from redshift
+    halos.nu  = map.nu_rest/(halos.redshift+1)
 
-    return T_lyman_alpha
+
+    # flip frequency bins because np.histogram needs increasing bins
+    bins3D = [map.pix_binedges_x, map.pix_binedges_y, map.nu_binedges[::-1]]
+
+
+    # bin in RA, DEC, NU_obs
+    if debug.verbose: print('\n\tBinning halos into map')
+    maps, edges = np.histogramdd( np.c_[halos.ra.flatten(), halos.dec.flatten(), halos.nu.flatten()],
+                                  bins    = bins3D,
+                                  weights = halos.L.flatten() )  # T is changed with L. The original code was weights = halos.T.flatten()
+
+
+    # flip back frequency bins
+    return maps[:,:,::-1]
+
+
+
 ################################################################################################################################################################
 @timeme
 def save_maps(map):

@@ -190,8 +190,9 @@ def plot_results(mapinst,k,Pk,Pk_sampleerr,params):
     if params.plot_cube:
         plt.figure().set_tight_layout(True)
         # im = plt.imshow(np.log10(mapinst.maps[:,:,params.nmaps//2]+1e-6), extent=[-mapinst.fov_x/2,mapinst.fov_x/2,-mapinst.fov_y/2,mapinst.fov_y/2],vmin=-1,vmax=2)
-        im = plt.imshow(np.log10(mapinst.maps[:,:,params.nmaps//2]+1e-6), extent=[-mapinst.fov_x/2,mapinst.fov_x/2,-mapinst.fov_y/2,mapinst.fov_y/2])
-        plt.colorbar(im,label=r'$log_{10}\ T_b\ [\mu K]$')
+        im = plt.imshow(np.log10(mapinst.maps[:,:,params.nmaps//2]+1e-6), extent=[-mapinst.fov_x/2,mapinst.fov_x/2,-mapinst.fov_y/2,mapinst.fov_y/2], vmin=-6,vmax=15)
+        # plt.colorbar(im,label=r'$log_{10}\ T_b\ [\mu K]$')
+        plt.colorbar(im,label=r'$log_{10}\ L_☉$')
         plt.xlabel('degrees',fontsize=20)
         plt.ylabel('degrees',fontsize=20)
         plt.title('simulated map at {0:.3f} GHz'.format(mapinst.nu_bincents[params.nmaps//2]),fontsize=24)
